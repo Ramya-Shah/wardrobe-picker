@@ -8,6 +8,15 @@
       ],
       "~/*": [
         "./src/*"
+      ],
+      "zod": [
+        "./node_modules/zod"
+      ],
+      "zod/*": [
+        "./node_modules/zod/*"
+      ],
+      "fflate": [
+        "./node_modules/fflate"
       ]
     }
   },
