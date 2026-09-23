@@ -17,6 +17,8 @@ export interface ParsedImportItem {
   /** Name as found in the raw JSON (for error messages even when invalid). */
   label: string;
   input: ClothingItemInput | null;
+  /** For invalid items: the valid parts of Claude's JSON, as a starting point for fixing it by hand. */
+  draft: ClothingItemInput | null;
   inferredFields: EditableField[];
   errors: string[];
   warnings: string[];
@@ -74,6 +76,30 @@ function warningsFor(item: ClaudeClothingItem): string[] {
   return warnings;
 }
 
+/**
+ * Salvage what is valid from an invalid item: drop the top-level keys that failed and
+ * re-parse with a placeholder name. Used to pre-fill the "fix" form in the import preview.
+ */
+export function salvageDraft(raw: Record<string, unknown>): ClothingItemInput | null {
+  const obj: Record<string, unknown> = { ...raw };
+  const hadName = typeof obj.name === "string" && obj.name.trim() !== "";
+  if (!hadName) obj.name = "_";
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const r = claudeClothingItemSchema.safeParse(obj);
+    if (r.success) {
+      const input = claudeItemToInput(r.data);
+      return hadName ? input : { ...input, name: "" };
+    }
+    const bad = new Set(r.error.issues.map((i) => String(i.path[0] ?? "")));
+    if (bad.has("")) return null;
+    for (const key of bad) {
+      if (key === "name") obj.name = "_";
+      else delete obj[key];
+    }
+  }
+  return null;
+}
+
 /** Validate a single already-parsed clothing object. */
 export function validateClaudeItem(raw: unknown, index = 0): ParsedImportItem {
   const label = labelFor(raw, index);
@@ -82,11 +108,12 @@ export function validateClaudeItem(raw: unknown, index = 0): ParsedImportItem {
       ? ((raw as { image: string }).image.trim() || null)
       : null;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    return { index, ok: false, image, label, input: null, inferredFields: [], errors: ["Each item must be a JSON object."], warnings: [], raw };
+    return { index, ok: false, image, label, input: null, draft: null, inferredFields: [], errors: ["Each item must be a JSON object."], warnings: [], raw };
   }
   const result = claudeClothingItemSchema.safeParse(raw);
   if (!result.success) {
-    return { index, ok: false, image, label, input: null, inferredFields: [], errors: formatZodIssues(result.error), warnings: [], raw };
+    const draft = salvageDraft(raw as Record<string, unknown>);
+    return { index, ok: false, image, label, input: null, draft, inferredFields: [], errors: formatZodIssues(result.error), warnings: [], raw };
   }
   return {
     index,
@@ -94,6 +121,7 @@ export function validateClaudeItem(raw: unknown, index = 0): ParsedImportItem {
     image: result.data.image,
     label: result.data.name,
     input: claudeItemToInput(result.data),
+    draft: null,
     inferredFields: normalizeInferredFields(result.data.inferredFields),
     errors: [],
     warnings: warningsFor(result.data),

@@ -119,8 +119,22 @@ export const clothingItemInputSchema = z.object({
   userNotes: nullableLongText,
 }) satisfies z.ZodType<ClothingItemInput, unknown>;
 
-/** PATCH payload: any subset of editable fields. Absent keys are left untouched. */
-export const clothingItemPatchSchema = clothingItemInputSchema.partial();
+const clothingItemPatchSchema = clothingItemInputSchema.partial();
+
+/**
+ * Validate a PATCH payload (any subset of editable fields). Zod applies field defaults even
+ * inside `.partial()`, so the result is narrowed to the keys that were actually sent —
+ * absent keys must never overwrite existing values.
+ */
+export function parseClothingPatch(
+  raw: Record<string, unknown>,
+): { success: true; data: Partial<ClothingItemInput> } | { success: false; error: z.ZodError } {
+  const result = clothingItemPatchSchema.safeParse(raw);
+  if (!result.success) return { success: false, error: result.error };
+  const sent = new Set(Object.keys(raw));
+  const data = Object.fromEntries(Object.entries(result.data).filter(([k]) => sent.has(k))) as Partial<ClothingItemInput>;
+  return { success: true, data };
+}
 
 export function claudeItemToInput(item: ClaudeClothingItem): ClothingItemInput {
   const pairing: PairingSuggestions = { ...item.pairingSuggestions };

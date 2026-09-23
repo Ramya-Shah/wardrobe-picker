@@ -101,7 +101,7 @@ export function ImportPreview({
             onAssign={(filename) => onAssign(item.key, filename)}
             onEdit={() => {
               setEditing(item);
-              setDraft(item.input ?? { ...emptyClothingInput(), name: item.label.startsWith("Item #") ? "" : item.label });
+              setDraft(item.input ?? item.draft ?? { ...emptyClothingInput(), name: item.label.startsWith("Item #") ? "" : item.label });
             }}
           />
         ))}

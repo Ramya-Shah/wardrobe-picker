@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractJsonText, parseClaudeImport, validateClaudeItem } from "@/lib/import/parse-claude-json";
-import { clothingItemInputSchema, claudeItemToInput, claudeClothingItemSchema, inputToClaudeItem } from "@/lib/validation/clothing";
+import { clothingItemInputSchema, claudeItemToInput, claudeClothingItemSchema, inputToClaudeItem, parseClothingPatch } from "@/lib/validation/clothing";
 import { EXAMPLE_ITEM } from "@/lib/export/claude-prompt";
 import { claudeItem } from "./helpers";
 
@@ -69,6 +69,14 @@ describe("Claude clothing JSON validation", () => {
     expect(validateClaudeItem("nope").errors[0]).toMatch(/JSON object/);
   });
 
+  it("patches contain only the fields that were sent (no defaults for absent keys)", () => {
+    const r = parseClothingPatch({ material: " Cotton " });
+    expect(r).toEqual({ success: true, data: { material: "cotton" } });
+    const cleared = parseClothingPatch({ tags: null, subcategory: "" });
+    expect(cleared).toEqual({ success: true, data: { tags: [], subcategory: null } });
+    expect(parseClothingPatch({ name: "" }).success).toBe(false);
+  });
+
   it("flat input schema validates API/user metadata", () => {
     expect(clothingItemInputSchema.safeParse({ name: "" }).success).toBe(false);
     const ok = clothingItemInputSchema.parse({ name: "Tee", category: "top" });
@@ -108,6 +116,12 @@ describe("parseClaudeImport", () => {
     expect(r.ok).toBe(false);
     expect(r.items.map((i) => i.ok)).toEqual([true, false, true]);
     expect(r.items[1].errors[0]).toMatch(/name/);
+  });
+
+  it("salvages the valid parts of an invalid item as a draft for fixing", () => {
+    const r = parseClaudeImport({ items: [claudeItem({ name: "", category: "DRESS", subcategory: "midi", tags: { bad: true } })] });
+    expect(r.items[0].ok).toBe(false);
+    expect(r.items[0].draft).toMatchObject({ name: "", category: "DRESS", subcategory: "midi", primaryColor: "black", tags: [] });
   });
 
   it("flags two items claiming the same image", () => {

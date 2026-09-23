@@ -26,13 +26,7 @@ export function OriginMark({ origin, className }: { origin: FieldOrigin; classNa
         inferred
       </span>
     );
-  if (origin === "ai")
-    return (
-      <span title="From Claude" className={cn("inline-flex items-center text-ai/70", className)}>
-        <Sparkles className="size-3" />
-        <span className="sr-only">From Claude</span>
-      </span>
-    );
+  // Plain Claude values are the default and stay unmarked (the item-level "Claude" badge covers them).
   return null;
 }
 
@@ -42,7 +36,7 @@ export function ProvenanceLegend({ item }: { item: ClothingItem }) {
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
       {item.aiGenerated && (
         <span className="inline-flex items-center gap-1">
-          <OriginMark origin="ai" /> from Claude
+          <Sparkles className="size-3 text-ai" /> described by Claude
         </span>
       )}
       {item.inferredFields.length > 0 && (

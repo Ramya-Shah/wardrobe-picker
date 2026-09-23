@@ -13,6 +13,8 @@ export interface PreviewItem {
   input: ClothingItemInput | null;
   /** What Claude produced, to work out which fields the user corrected in the preview. */
   originalInput: ClothingItemInput | null;
+  /** Best-effort pre-fill for fixing an invalid item. */
+  draft: ClothingItemInput | null;
   inferredFields: string[];
   raw: unknown;
   source: "claude" | "manual";
