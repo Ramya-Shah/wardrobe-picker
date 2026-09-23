@@ -2,6 +2,11 @@
 
 A personal wardrobe app you use from your phone's browser (or as an installed PWA) while it runs on your own computer. It stores photos of your clothes plus rich metadata, lets you browse, search, filter and edit everything, and builds outfits.
 
+There are two versions, sharing the same core code and data formats:
+
+- **Web app** (this folder): runs on your computer; you open it from your phone's browser over Wi-Fi.
+- **Android app** ([`mobile/`](mobile/README.md), Expo): runs **fully offline on the phone** — database and photos stored on the device. Backups move between the two.
+
 **Claude is the AI, but the app never calls it.** You chat with Claude yourself: Claude looks at your photos and returns JSON in the schema this app defines; you import that JSON. For outfits, the app exports your wardrobe as text for Claude, and you import Claude's outfit JSON. No API keys, accounts, cloud database or cloud storage. Browsing works without internet.
 
 ---
@@ -179,6 +184,7 @@ Copying the whole `data/` folder is also a complete backup.
 ## Project structure
 
 ```
+mobile/                    Android app (Expo) — see mobile/README.md
 app/
   page.tsx                 home: My Wardrobe (stats, quick actions, recent, grid)
   wardrobe/                browser, [id] detail, [id]/edit, new (manual add)
@@ -241,4 +247,4 @@ The foundation is built for these; none of them is implemented yet:
 - Outfit history, wear tracking, "haven't worn recently", favourite outfits (new tables that reference existing IDs).
 - Packing lists, shopping gap analysis, wardrobe statistics.
 - An optional AI API integration behind a setting (off by default).
-- A native mobile app on top of the existing JSON API.
+- An iPhone build of the Expo app (the code is cross-platform; it needs an Apple developer account to install).
