@@ -19,10 +19,14 @@ const SYNONYMS: Record<string, string[]> = {
 
 /** Lowercase, strip punctuation (keep hyphens between letters), collapse whitespace. */
 export function normalizeText(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+  let v = value.toLowerCase();
+  try {
+    v = v.normalize("NFKD"); // split accents off letters; guarded for JS engines without full Unicode data
+  } catch {
+    // keep as-is
+  }
+  return v
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/_/g, " ")
     .replace(/[^a-z0-9\s-]/g, " ")
     .replace(/\s+/g, " ")

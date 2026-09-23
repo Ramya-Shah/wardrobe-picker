@@ -1,5 +1,6 @@
-import { createHash } from "node:crypto";
-import { MAX_IMAGE_BYTES } from "@/lib/config";
+import { MAX_IMAGE_BYTES } from "@/lib/constants/limits";
+
+// Pure (no Node APIs): shared with the mobile app. Hashing lives in ./hash.ts.
 
 export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
 export type ImageExtension = "jpg" | "png" | "webp";
@@ -76,6 +77,3 @@ export function validateImage(buf: Uint8Array, filename: string, declaredMime?: 
   return { ok: true, ext: sniffed, mime: MIME_BY_EXT[sniffed], error: null };
 }
 
-export function sha256(buf: Uint8Array): string {
-  return createHash("sha256").update(buf).digest("hex");
-}

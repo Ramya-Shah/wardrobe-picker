@@ -1,8 +1,10 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { imagesDir, MAX_IMAGE_BYTES } from "@/lib/config";
+import { imagesDir } from "@/lib/config";
+import { MAX_IMAGE_BYTES } from "@/lib/constants/limits";
 import { resolveImageFile } from "@/lib/images/storage";
-import { sanitizeFilename, sha256, sniffImageType, validateImage } from "@/lib/images/validate";
+import { sha256 } from "@/lib/images/hash";
+import { sanitizeFilename, sniffImageType, validateImage } from "@/lib/images/validate";
 import { makeImage } from "./helpers";
 
 describe("image validation", () => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SAFE_ID_PATTERN } from "@/lib/db/ids";
+import { SAFE_ID_PATTERN } from "@/lib/constants/limits";
 import { outfitRoleSchema } from "@/lib/validation/outfit";
 import { textList } from "@/lib/validation/primitives";
 

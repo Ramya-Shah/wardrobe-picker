@@ -19,5 +19,4 @@ export function newOutfitId(): string {
   return `out_${randomToken(8)}`;
 }
 
-/** IDs are used in file names, so they must stay filesystem-safe. */
-export const SAFE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+export { SAFE_ID_PATTERN } from "@/lib/constants/limits";

@@ -32,5 +32,4 @@ export function databaseFilePath(): string | null {
   return path.isAbsolute(p) ? p : path.resolve(process.cwd(), "prisma", p);
 }
 
-export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
-export const THUMBNAIL_WIDTH = 480;
+export { MAX_IMAGE_BYTES, THUMBNAIL_WIDTH } from "@/lib/constants/limits";

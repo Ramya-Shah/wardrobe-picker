@@ -3,7 +3,8 @@ import { prisma } from "@/lib/db/client";
 import { createItem, deleteItemRecord, getItem, getRawImport, updateItemImage, findItemsByHashes } from "@/lib/db/clothing";
 import { newClothingId } from "@/lib/db/ids";
 import { copyItemImage, deleteItemImage, saveItemImage } from "@/lib/images/storage";
-import { sanitizeFilename, sha256, validateImage } from "@/lib/images/validate";
+import { sha256 } from "@/lib/images/hash";
+import { sanitizeFilename, validateImage } from "@/lib/images/validate";
 import { imagesDir, stagingDir, thumbsDir } from "@/lib/config";
 import type { ClothingItem } from "@/lib/types";
 

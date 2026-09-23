@@ -2,7 +2,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { stagingDir } from "@/lib/config";
 import { randomToken } from "@/lib/db/ids";
-import { sanitizeFilename, sha256, validateImage, type ImageExtension } from "./validate";
+import { sha256 } from "./hash";
+import { sanitizeFilename, validateImage, type ImageExtension } from "./validate";
 
 /**
  * Import staging area (data/staging/<session>/).

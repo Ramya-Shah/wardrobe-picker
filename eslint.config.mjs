@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Expo app has its own tooling (npx expo lint / tsc in mobile/).
+    "mobile/**",
   ]),
 ]);
 
