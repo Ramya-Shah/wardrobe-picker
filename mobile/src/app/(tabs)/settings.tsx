@@ -157,7 +157,8 @@ function RestoreSheet({ visible, onClose, onRestore }: { visible: boolean; onClo
   const [result, setResult] = useState<RestoreResult | null>(null);
 
   const pick = async () => {
-    const r = await DocumentPicker.getDocumentAsync({ type: ["application/zip", "application/json", "application/octet-stream", "*/*"], copyToCacheDirectory: true });
+    // Read in place via content:// (see src/platform/pickers.ts for why we don't copy).
+    const r = await DocumentPicker.getDocumentAsync({ type: ["application/zip", "application/json", "application/octet-stream", "*/*"], copyToCacheDirectory: false });
     if (!r.canceled) {
       setFile({ uri: r.assets[0].uri, name: r.assets[0].name });
       setResult(null);

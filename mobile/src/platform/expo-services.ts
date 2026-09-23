@@ -30,9 +30,26 @@ function wrapDb(conn: SQLite.SQLiteDatabase, inTransaction = false): Db {
   return db;
 }
 
+/** Turn expo-file-system's permission error into advice the user can act on. */
+function friendlyReadError(e: unknown): Error {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (/permission/i.test(msg)) {
+    return new Error("Android didn't allow the app to read this file. Pick it again using Files (the Files/Documents picker) instead.");
+  }
+  return e instanceof Error ? e : new Error(msg);
+}
+
+async function guardRead<T>(read: () => Promise<T>): Promise<T> {
+  try {
+    return await read();
+  } catch (e) {
+    throw friendlyReadError(e);
+  }
+}
+
 const files: FileStore = {
-  readBytes: (p) => new File(p).bytes(),
-  readText: (p) => new File(p).text(),
+  readBytes: (p) => guardRead(() => new File(p).bytes()),
+  readText: (p) => guardRead(() => new File(p).text()),
   async writeBytes(p, data) {
     const f = new File(p);
     if (!f.exists) f.create({ intermediates: true });
@@ -78,10 +95,14 @@ const files: FileStore = {
     return { write: (b) => handle.writeBytes(b), close: () => handle.close() };
   },
   openReader(p) {
-    const f = new File(p);
-    const size = f.size ?? 0;
-    const handle = f.open(FileMode.ReadOnly);
-    return { size, read: (n) => handle.readBytes(n), close: () => handle.close() };
+    try {
+      const f = new File(p);
+      const size = f.size ?? 0;
+      const handle = f.open(FileMode.ReadOnly);
+      return { size, read: (n) => handle.readBytes(n), close: () => handle.close() };
+    } catch (e) {
+      throw friendlyReadError(e);
+    }
   },
 };
 

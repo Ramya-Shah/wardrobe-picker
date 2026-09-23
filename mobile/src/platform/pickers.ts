@@ -36,15 +36,19 @@ export async function takePhoto(): Promise<PickedFile | null> {
   return { uri: a.uri, name: nameFor(a, 0), mimeType: a.mimeType };
 }
 
+// Files are read in place through Android's content:// link (copyToCacheDirectory: false).
+// Copies in the picker's cache can fall outside the folders expo-file-system may read
+// (notably in Expo Go: "Missing 'READ' permission"), while content:// links are always allowed.
+
 /** Photos via the Files app — always keeps the exact original file names. */
 export async function pickPhotoFiles(multiple: boolean): Promise<PickedFile[]> {
-  const r = await DocumentPicker.getDocumentAsync({ type: ["image/*"], multiple, copyToCacheDirectory: true });
+  const r = await DocumentPicker.getDocumentAsync({ type: ["image/*"], multiple, copyToCacheDirectory: false });
   if (r.canceled) return [];
   return r.assets.map((a) => ({ uri: a.uri, name: a.name, mimeType: a.mimeType }));
 }
 
 export async function pickTextFile(): Promise<PickedFile | null> {
-  const r = await DocumentPicker.getDocumentAsync({ type: ["application/json", "text/plain", "*/*"], copyToCacheDirectory: true });
+  const r = await DocumentPicker.getDocumentAsync({ type: ["application/json", "text/plain", "*/*"], copyToCacheDirectory: false });
   if (r.canceled) return null;
   const a = r.assets[0];
   return { uri: a.uri, name: a.name, mimeType: a.mimeType };
