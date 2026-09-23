@@ -1,0 +1,55 @@
+{
+  "name": "wardrobe-picker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "setup": "prisma migrate deploy && prisma generate && node scripts/print-lan-url.mjs",
+    "predev": "prisma migrate deploy && node scripts/print-lan-url.mjs",
+    "dev": "next dev -H 0.0.0.0",
+    "build": "prisma generate && next build",
+    "prestart": "prisma migrate deploy && node scripts/print-lan-url.mjs",
+    "start": "next start -H 0.0.0.0",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "docs:prompt": "tsx scripts/generate-prompt-doc.ts",
+    "icons": "node scripts/generate-icons.mjs",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-tabs": "^1.1.21",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
+    "lucide-react": "^1.47.0",
+    "next": "16.3.6",
+    "prisma": "^6.19.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sharp": "^0.35.4",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.1"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

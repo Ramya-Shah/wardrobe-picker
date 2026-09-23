@@ -1,0 +1,32 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+
+# misc
+.DS_Store
+*.pem
+certificates/
+
+# debug
+npm-debug.log*
+
+# env files — .env only holds the local SQLite path and is committed on purpose
+.env*.local
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local wardrobe data (database, images, staging) — never commit personal data
+/data/*
+!/data/.gitkeep
+/test-data/

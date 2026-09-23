@@ -1,0 +1,124 @@
+// Wardrobe database schema.
+//
+// Array-like and nested metadata (colors, styles, tags, pairing suggestions…)
+// are stored as JSON-encoded TEXT columns and (de)serialized in lib/db/mappers.ts.
+// Scalar attributes that are filtered/sorted frequently are real columns with indexes.
+// Image binaries never live in SQLite — only file names relative to data/images.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ClothingItem {
+  id               String @id
+  name             String
+
+  // Image (file lives in data/images/<id>.<ext>; thumbnail in data/images/thumbs/<id>.webp)
+  imagePath        String?
+  originalFilename String?
+  imageHash        String?
+  imageMime        String?
+  imageSize        Int?
+  imageWidth       Int?
+  imageHeight      Int?
+
+  // Classification — plain strings so unknown values from Claude never break the app
+  category         String @default("OTHER")
+  subcategory      String?
+
+  // Colors
+  primaryColor     String?
+  secondaryColors  String @default("[]") // JSON string[]
+
+  // Appearance
+  pattern          String?
+  texture          String?
+  graphic          String?
+  logo             String?
+
+  // Construction
+  material         String?
+  fit              String?
+  sleeveType       String?
+  neckline         String?
+  length           String?
+  silhouette       String?
+
+  // Style
+  styles           String @default("[]") // JSON string[]
+  formality        String?
+
+  // Context
+  seasons          String @default("[]") // JSON string[]
+  occasions        String @default("[]") // JSON string[]
+  environments     String @default("[]") // JSON string[]
+
+  // Search
+  tags             String @default("[]") // JSON string[]
+  description      String?
+  searchText       String @default("")
+
+  // Pairing
+  pairingSuggestions String @default("{}") // JSON { tops, bottoms, dresses, outerwear, shoes, accessories }
+
+  // User
+  userNotes        String?
+
+  // Provenance
+  source           String  @default("manual") // "claude" | "manual" | "restore" | ...
+  aiGenerated      Boolean @default(false)
+  userEdited       Boolean @default(false)
+  inferredFields   String  @default("[]") // JSON string[] — fields Claude marked as inference
+  editedFields     String  @default("[]") // JSON string[] — fields the user changed manually
+  rawImport        String? // original imported JSON (verbatim), for audit/debugging
+  schemaVersion    Int?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  outfitItems      OutfitItem[]
+
+  @@index([category])
+  @@index([subcategory])
+  @@index([primaryColor])
+  @@index([formality])
+  @@index([imageHash])
+  @@index([createdAt])
+}
+
+model Outfit {
+  id          String   @id
+  name        String
+  description String?
+  occasion    String?
+  season      String?
+  style       String?
+  explanation String?
+  source      String   @default("manual") // "claude" | "manual" | "restore"
+  rawImport   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       OutfitItem[]
+
+  @@index([createdAt])
+}
+
+model OutfitItem {
+  id             String       @id @default(cuid())
+  outfitId       String
+  clothingItemId String
+  role           String // TOP | BOTTOM | DRESS | OUTERWEAR | SHOES | ACCESSORY
+  position       Int          @default(0)
+
+  outfit         Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  clothingItem   ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
+
+  @@unique([outfitId, clothingItemId])
+  @@index([clothingItemId])
+}
