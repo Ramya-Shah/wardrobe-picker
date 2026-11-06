@@ -1,22 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { BackupReminder } from "~/components/backup";
 import { ClothingImage } from "~/components/clothing-image";
 import { EmptyWardrobe } from "~/components/empty-wardrobe";
 import { WardrobeBrowser } from "~/components/wardrobe-browser";
 import { useWardrobe } from "~/state/wardrobe";
 import { IconButton, SectionTitle, type IconName } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 const ACTIONS: { href: string; label: string; icon: IconName }[] = [
   { href: "/add", label: "Add clothing", icon: "camera-outline" },
   { href: "/import", label: "Import from Claude", icon: "sparkles-outline" },
-  { href: "/picker", label: "Outfit picker", icon: "color-wand-outline" },
+  { href: "/builder", label: "Build outfit", icon: "color-wand-outline" },
   { href: "/search", label: "Search", icon: "search-outline" },
 ];
 
 export default function Home() {
+  const colors = useColors();
   const { items, outfits } = useWardrobe();
   const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
   return (
@@ -34,6 +36,7 @@ export default function Home() {
         <WardrobeBrowser
           header={
             <View style={{ gap: 22, paddingBottom: 16 }}>
+              <BackupReminder />
               <View style={{ flexDirection: "row" }}>
                 {ACTIONS.map((a) => (
                   <Pressable key={a.href} onPress={() => router.push(a.href as never)} style={{ flex: 1, alignItems: "center", gap: 6 }}>

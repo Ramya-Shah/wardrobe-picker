@@ -14,7 +14,7 @@ import { Button, Card, Chip, Field, IconButton, Label, Muted, SectionTitle } fro
 import { Screen } from "~/ui/screen";
 import { Sheet } from "~/ui/sheet";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 const CONTEXT_PER_ROLE = 8;
 
@@ -23,13 +23,14 @@ const CONTEXT_PER_ROLE = 8;
  * per role, then copy a ready-made request for Claude — or save your own pick.
  */
 export default function PickerScreen() {
+  const colors = useColors();
   const params = useLocalSearchParams<{ item?: string }>();
   const { svc, items, itemsById, refresh } = useWardrobe();
   const toast = useToast();
   const [occasion, setOccasion] = useState("");
   const [style, setStyle] = useState("");
   const [season, setSeason] = useState("");
-  const [required, setRequired] = useState<string[]>(params.item ? [params.item] : []);
+  const [required, setRequired] = useState<string[]>(params.item ? params.item.split(",").filter(Boolean).slice(0, 20) : []);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [chooser, setChooser] = useState(false);
   const [chooserSel, setChooserSel] = useState<Set<string>>(new Set());

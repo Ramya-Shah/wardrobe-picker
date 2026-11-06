@@ -4,13 +4,15 @@ import { router } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { useBackupNow } from "~/components/backup";
 import { createBackupZip, exportCsv, exportWardrobeJson, restoreBackup, storageStats, wipeWardrobe, type RestoreMode, type RestoreResult } from "~/core/backup";
+import { daysSinceBackup, REMINDER_OPTIONS } from "~/core/settings";
 import { useWardrobe } from "~/state/wardrobe";
 import { Banner, Body, Button, Card, Field, Muted, Segmented, Title, type IconName } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { Sheet } from "~/ui/sheet";
 import { useToast } from "~/ui/toast";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 function formatBytes(b: number) {
   if (b < 1024) return `${b} B`;
@@ -25,7 +27,10 @@ function formatBytes(b: number) {
 }
 
 export default function SettingsScreen() {
-  const { svc, items, outfits, refresh } = useWardrobe();
+  const colors = useColors();
+  const { svc, items, outfits, refresh, settings, updateSettings } = useWardrobe();
+  const { backupNow, busy: backingUp } = useBackupNow();
+  const lastBackup = daysSinceBackup(settings);
   const toast = useToast();
   const [stats, setStats] = useState<Awaited<ReturnType<typeof storageStats>> | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -61,6 +66,18 @@ export default function SettingsScreen() {
           </Card>
         </Section>
 
+        <Section title="Appearance">
+          <Segmented
+            value={settings.theme}
+            onChange={(theme) => updateSettings({ theme })}
+            options={[
+              { value: "system", label: "System" },
+              { value: "light", label: "Light" },
+              { value: "dark", label: "Dark" },
+            ]}
+          />
+        </Section>
+
         <Section title="Claude">
           <Card>
             <LinkRow icon="sparkles-outline" label="Import Claude metadata" hint="Photos + JSON" onPress={() => router.push("/import")} />
@@ -72,7 +89,13 @@ export default function SettingsScreen() {
 
         <Section title="Export & backup" description="Save to Google Drive, Files or send anywhere. Plain JSON, CSV and your original photos — never locked in.">
           <Card>
-            <LinkRow icon="archive-outline" label="Full backup (.zip)" hint="database.json + photos" busy={busy === "full"} onPress={() => exportAndShare("full", () => createBackupZip(svc, "full"), "application/zip")} />
+            <LinkRow
+              icon="archive-outline"
+              label="Full backup (.zip)"
+              hint={`database.json + photos · ${lastBackup === null ? "never backed up" : lastBackup === 0 ? "last backup today" : `last backup ${lastBackup} day${lastBackup === 1 ? "" : "s"} ago`}`}
+              busy={backingUp}
+              onPress={backupNow}
+            />
             <LinkRow icon="document-text-outline" label="Export wardrobe (JSON)" hint="Human-readable" busy={busy === "json"} onPress={() => exportAndShare("json", () => exportWardrobeJson(svc), "application/json")} />
             <LinkRow icon="grid-outline" label="Export CSV" hint="For spreadsheets" busy={busy === "csv"} onPress={() => exportAndShare("csv", () => exportCsv(svc), "text/csv")} />
             <LinkRow icon="images-outline" label="Export photos (.zip)" hint="Original images" busy={busy === "images"} onPress={() => exportAndShare("images", () => createBackupZip(svc, "images"), "application/zip")} />
@@ -80,12 +103,20 @@ export default function SettingsScreen() {
           <Muted style={{ marginTop: 8 }}>Tip: back up regularly — uninstalling the app deletes its data.</Muted>
         </Section>
 
+        <Section title="Backup reminder" description="Shows a reminder on the home screen when it’s time to save a new backup.">
+          <Segmented
+            value={String(settings.backupReminderDays)}
+            onChange={(v) => updateSettings({ backupReminderDays: Number(v), backupSnoozedUntil: null })}
+            options={REMINDER_OPTIONS.map((d) => ({ value: String(d), label: d === 0 ? "Off" : `${d} days` }))}
+          />
+        </Section>
+
         <Section title="Restore / import wardrobe" description="From a wardrobe-backup.zip made by this app or the computer version.">
           <Button title="Restore a backup…" icon="cloud-upload-outline" variant="outline" onPress={() => setRestoreOpen(true)} />
         </Section>
 
         <Section title="Danger zone">
-          <Button title="Delete all wardrobe data" icon="trash-outline" variant="outline" onPress={() => setWipeOpen(true)} style={{ borderColor: "#F0C9C4" }} />
+          <Button title="Delete all wardrobe data" icon="trash-outline" variant="outline" onPress={() => setWipeOpen(true)} style={{ borderColor: colors.errorBorder }} />
         </Section>
 
         <Muted style={{ textAlign: "center" }}>Wardrobe works fully offline. Claude is used only through your own chats — this app never contacts any AI service.</Muted>
@@ -128,6 +159,7 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
+  const colors = useColors();
   return (
     <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
       <Text style={{ color: colors.mutedForeground }}>{label}</Text>
@@ -137,6 +169,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
 }
 
 function LinkRow({ icon, label, hint, onPress, busy }: { icon: IconName; label: string; hint: string; onPress: () => void; busy?: boolean }) {
+  const colors = useColors();
   return (
     <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }, pressed && { backgroundColor: colors.accent }]}>
       <Ionicons name={icon} size={20} color={colors.mutedForeground} />

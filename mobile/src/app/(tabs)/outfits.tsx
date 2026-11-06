@@ -4,9 +4,10 @@ import { OutfitCard } from "~/components/outfit-card";
 import { useWardrobe } from "~/state/wardrobe";
 import { Body, Button, Title } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 export default function OutfitsScreen() {
+  const colors = useColors();
   const { outfits, items } = useWardrobe();
   return (
     <Screen inTabs large title="Outfits" subtitle={outfits.length ? `${outfits.length} saved` : undefined}>
@@ -17,9 +18,12 @@ export default function OutfitsScreen() {
         columnWrapperStyle={{ gap: 12 }}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 18 }}
         ListHeaderComponent={
-          <View style={{ flexDirection: "row", gap: 8, paddingBottom: 8 }}>
-            <Button title="Outfit picker" icon="color-wand-outline" style={{ flex: 1 }} onPress={() => router.push("/picker")} />
-            <Button title="Import outfit" icon="code-download-outline" variant="outline" style={{ flex: 1 }} onPress={() => router.push("/outfit-import")} />
+          <View style={{ gap: 8, paddingBottom: 8 }}>
+            <Button title="Build an outfit" icon="color-wand-outline" onPress={() => router.push("/builder")} />
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button title="Ask Claude" icon="sparkles-outline" variant="outline" style={{ flex: 1 }} onPress={() => router.push("/picker")} />
+              <Button title="Import outfit" icon="code-download-outline" variant="outline" style={{ flex: 1 }} onPress={() => router.push("/outfit-import")} />
+            </View>
           </View>
         }
         ListEmptyComponent={

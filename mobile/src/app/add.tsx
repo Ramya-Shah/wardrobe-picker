@@ -14,10 +14,11 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Banner, Button } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 /** Add an item by hand: photo + form. Same duplicate-checked pipeline as imports. */
 export default function AddScreen() {
+  const colors = useColors();
   const { svc, refresh } = useWardrobe();
   const toast = useToast();
   const [photo, setPhoto] = useState<PickedFile | null>(null);

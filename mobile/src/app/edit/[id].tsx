@@ -14,10 +14,11 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Body, Button, Muted } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 /** Only changed fields are saved, so exactly those get marked "edited by you". */
 export default function EditScreen() {
+  const colors = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { svc, itemsById, refresh } = useWardrobe();
   const toast = useToast();

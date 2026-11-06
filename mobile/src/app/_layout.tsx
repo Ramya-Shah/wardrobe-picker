@@ -2,11 +2,12 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { WardrobeProvider } from "~/state/wardrobe";
+import { useWardrobe, WardrobeProvider } from "~/state/wardrobe";
+import { ThemeProvider, useTheme } from "~/ui/theme";
 import { ToastProvider } from "~/ui/toast";
-import { colors } from "~/ui/theme";
 
 function Loading({ error }: { error: string | null }) {
+  const { colors } = useTheme();
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background, padding: 24 }}>
       {error ? (
@@ -18,15 +19,37 @@ function Loading({ error }: { error: string | null }) {
   );
 }
 
+function ThemedApp() {
+  const { colors, dark } = useTheme();
+  return (
+    <>
+      <StatusBar style={dark ? "light" : "dark"} />
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: "slide_from_right" }} />
+      </ToastProvider>
+    </>
+  );
+}
+
+/** Applies the theme chosen in Settings (System / Light / Dark). */
+function WithUserTheme() {
+  const { settings } = useWardrobe();
+  return (
+    <ThemeProvider preference={settings.theme}>
+      <ThemedApp />
+    </ThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <ToastProvider>
+      {/* Follows the phone's light/dark setting until the saved preference is loaded. */}
+      <ThemeProvider>
         <WardrobeProvider fallback={(error) => <Loading error={error} />}>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: "slide_from_right" }} />
+          <WithUserTheme />
         </WardrobeProvider>
-      </ToastProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

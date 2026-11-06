@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconButton, Muted, Title } from "./primitives";
-import { colors, radius } from "./theme";
+import { radius, type Palette, useStyles } from "./theme";
 
 /** Bottom sheet (mobile-friendly modal) with a scrolling body and an optional pinned footer. */
 export function Sheet({
@@ -23,6 +23,7 @@ export function Sheet({
   tall?: boolean;
   scroll?: boolean;
 }) {
+  const styles = useStyles(makeStyles);
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -51,7 +52,8 @@ export function Sheet({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   backdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: colors.overlay },
   sheet: { maxHeight: "92%", backgroundColor: colors.background, borderTopLeftRadius: radius.xl + 8, borderTopRightRadius: radius.xl + 8 },
   grabber: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.input, marginTop: 10 },

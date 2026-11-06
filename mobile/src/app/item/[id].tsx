@@ -16,10 +16,12 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Badge, Body, Card, Muted, SectionTitle, Title, type IconName } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 import { CopySheet } from "~/components/copy-sheet";
 
 export default function ItemScreen() {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { svc, itemsById, outfits, refresh } = useWardrobe();
   const toast = useToast();
@@ -107,7 +109,7 @@ export default function ItemScreen() {
 
           <View style={{ flexDirection: "row" }}>
             <Action icon="pencil-outline" label="Edit" onPress={() => router.push(`/edit/${item.id}`)} />
-            <Action icon="color-wand-outline" label="Outfit" onPress={() => router.push(`/picker?item=${item.id}`)} />
+            <Action icon="color-wand-outline" label="Outfit" onPress={() => router.push(`/builder?item=${item.id}`)} />
             <Action icon="copy-outline" label={busy ? "…" : "Duplicate"} onPress={duplicate} />
             <Action icon="trash-outline" label="Delete" destructive onPress={remove} />
           </View>
@@ -118,7 +120,7 @@ export default function ItemScreen() {
                 <SectionTitle>Description</SectionTitle>
                 <View style={{ marginBottom: 8 }}><OriginMark origin={fieldOrigin(item, "description")} /></View>
               </View>
-              <Body style={{ color: "#4A4541" }}>{item.description}</Body>
+              <Body style={{ color: colors.softForeground }}>{item.description}</Body>
             </View>
           ) : null}
 
@@ -230,6 +232,7 @@ export default function ItemScreen() {
 }
 
 function Action({ icon, label, onPress, destructive }: { icon: IconName; label: string; onPress: () => void; destructive?: boolean }) {
+  const colors = useColors();
   const color = destructive ? colors.destructive : colors.foreground;
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [{ flex: 1, alignItems: "center", gap: 6 }, pressed && { opacity: 0.6 }]}>
@@ -241,6 +244,7 @@ function Action({ icon, label, onPress, destructive }: { icon: IconName; label: 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   tag: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 6 },
 });

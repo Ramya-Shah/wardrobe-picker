@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, radius } from "./theme";
+import { radius, type Palette, useColors, useStyles } from "./theme";
 
 type Kind = "success" | "error" | "info";
 const Ctx = createContext<(message: string, kind?: Kind) => void>(() => undefined);
@@ -10,6 +10,8 @@ const Ctx = createContext<(message: string, kind?: Kind) => void>(() => undefine
 export const useToast = () => useContext(Ctx);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const [toast, setToast] = useState<{ message: string; kind: Kind } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
@@ -24,8 +26,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {toast && (
         <View pointerEvents="none" style={[styles.wrap, { bottom: insets.bottom + 84 }]}>
           <View style={[styles.toast, toast.kind === "error" && { backgroundColor: colors.destructive }]}>
-            <Ionicons name={toast.kind === "error" ? "alert-circle" : toast.kind === "info" ? "information-circle" : "checkmark-circle"} size={18} color="#fff" />
-            <Text style={styles.text}>{toast.message}</Text>
+            <Ionicons name={toast.kind === "error" ? "alert-circle" : toast.kind === "info" ? "information-circle" : "checkmark-circle"} size={18} color={toast.kind === "error" ? "#fff" : colors.primaryForeground} />
+            <Text style={[styles.text, { color: toast.kind === "error" ? "#fff" : colors.primaryForeground }]}>{toast.message}</Text>
           </View>
         </View>
       )}
@@ -33,8 +35,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   wrap: { position: "absolute", left: 16, right: 16, alignItems: "center" },
   toast: { flexDirection: "row", gap: 8, alignItems: "flex-start", backgroundColor: colors.primary, paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.lg, maxWidth: 480 },
-  text: { color: "#fff", fontSize: 14, flexShrink: 1 },
+  text: { fontSize: 14, flexShrink: 1 },
 });

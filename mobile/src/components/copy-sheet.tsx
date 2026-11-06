@@ -6,7 +6,7 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Button, Muted } from "~/ui/primitives";
 import { Sheet } from "~/ui/sheet";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 // Android refuses very large text in share intents / clipboard; beyond this, share a .txt file instead.
 const LARGE = 200_000;
@@ -29,6 +29,7 @@ export function CopySheet({
   filename: string;
   extraFooter?: React.ReactNode;
 }) {
+  const colors = useColors();
   const { svc } = useWardrobe();
   const toast = useToast();
   const large = text.length > LARGE;

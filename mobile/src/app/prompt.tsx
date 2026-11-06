@@ -6,10 +6,11 @@ import { pickPhotos } from "~/platform/pickers";
 import { Body, Button, Card, Muted } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 /** The Claude wardrobe prompt (same text as docs/CLAUDE_WARDROBE_PROMPT.md). */
 export default function PromptScreen() {
+  const colors = useColors();
   const toast = useToast();
   const [names, setNames] = useState<string[]>([]);
   const text = names.length ? `${WARDROBE_PROMPT}\n${filenameListMessage(names)}\n` : WARDROBE_PROMPT;

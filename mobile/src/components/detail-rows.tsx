@@ -2,12 +2,13 @@ import { Text, View } from "react-native";
 import { humanize } from "@/lib/constants/categories";
 import type { ClothingItem, EditableField } from "@/lib/types";
 import { Card } from "~/ui/primitives";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 import { fieldOrigin, OriginMark } from "./provenance";
 
 export type Row = { field: EditableField; label: string; value: string | string[] | null };
 
 export function DetailRows({ item, rows }: { item: ClothingItem; rows: Row[] }) {
+  const colors = useColors();
   const visible = rows.filter((r) => (Array.isArray(r.value) ? r.value.length > 0 : Boolean(r.value)));
   if (!visible.length) return null;
   return (

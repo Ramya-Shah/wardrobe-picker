@@ -10,10 +10,11 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Banner, Body, Button, Card, Field, Muted, Title } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 /** Paste Claude's outfit JSON → check structure, roles and every clothing ID → preview with photos → save. */
 export default function OutfitImportScreen() {
+  const colors = useColors();
   const { svc, itemsById, refresh } = useWardrobe();
   const toast = useToast();
   const [json, setJson] = useState("");

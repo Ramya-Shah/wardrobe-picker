@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { StyleSheet, View, type ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconButton, Muted, Title } from "./primitives";
-import { colors } from "./theme";
+import { type Palette, useStyles } from "./theme";
 
 /** Screen with a title bar: optional back button, large serif title, right-side actions. */
 export function Screen({
@@ -25,6 +25,7 @@ export function Screen({
   /** Tab screens: the tab bar already handles the bottom inset. */
   inTabs?: boolean;
 }) {
+  const styles = useStyles(makeStyles);
   return (
     <SafeAreaView edges={inTabs ? ["top"] : ["top", "bottom"]} style={[styles.safe, style]}>
       <View style={styles.header}>
@@ -42,7 +43,8 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8, minHeight: 56 },
 });

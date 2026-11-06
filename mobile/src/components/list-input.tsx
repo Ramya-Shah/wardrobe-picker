@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { humanize } from "@/lib/constants/categories";
 import { Chip } from "~/ui/primitives";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 
 /** Editable list of short values (tags, colors, occasions…) as removable chips, with one-tap suggestions. */
 export function ListInput({
@@ -20,6 +20,8 @@ export function ListInput({
   /** Show all suggestions as toggle chips (short vocabularies like seasons). */
   quickPick?: boolean;
 }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const [draft, setDraft] = useState("");
   const add = (raw: string) => {
     const next = [...value];
@@ -84,7 +86,8 @@ export function ListInput({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   box: { borderWidth: 1, borderColor: colors.input, borderRadius: radius.md, backgroundColor: colors.card, padding: 8 },
   pill: { flexDirection: "row", alignItems: "center", gap: 4, height: 32, paddingLeft: 12, paddingRight: 8, borderRadius: radius.full, backgroundColor: colors.muted },
   add: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.muted, alignItems: "center", justifyContent: "center" },

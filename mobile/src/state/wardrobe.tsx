@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { listItems } from "~/core/items";
 import { listOutfits } from "~/core/outfits";
+import { DEFAULT_SETTINGS, loadSettings, saveSettings, type AppSettings } from "~/core/settings";
 import type { Services } from "~/core/services";
 import { createExpoServices } from "~/platform/expo-services";
 import type { ClothingItem, Outfit } from "@/lib/types";
@@ -10,6 +11,8 @@ interface WardrobeState {
   items: ClothingItem[];
   outfits: Outfit[];
   itemsById: Map<string, ClothingItem>;
+  settings: AppSettings;
+  updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
   /** Reload items and outfits from the database after a change. */
   refresh: () => Promise<void>;
 }
@@ -25,6 +28,7 @@ export function WardrobeProvider({ children, fallback }: { children: React.React
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
   const load = useCallback(async (s: Services) => {
     const all = await listItems(s.db);
@@ -37,6 +41,7 @@ export function WardrobeProvider({ children, fallback }: { children: React.React
     createExpoServices()
       .then(async (s) => {
         await load(s);
+        setSettings(await loadSettings(s.db));
         if (!cancelled) setSvc(s);
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -49,9 +54,17 @@ export function WardrobeProvider({ children, fallback }: { children: React.React
     if (svc) await load(svc);
   }, [svc, load]);
 
+  const updateSettings = useCallback(
+    async (patch: Partial<AppSettings>) => {
+      setSettings((prev) => ({ ...prev, ...patch }));
+      if (svc) await saveSettings(svc.db, patch);
+    },
+    [svc],
+  );
+
   const value = useMemo(
-    () => (svc ? { svc, items, outfits, itemsById: new Map(items.map((i) => [i.id, i])), refresh } : null),
-    [svc, items, outfits, refresh],
+    () => (svc ? { svc, items, outfits, itemsById: new Map(items.map((i) => [i.id, i])), refresh, settings, updateSettings } : null),
+    [svc, items, outfits, refresh, settings, updateSettings],
   );
 
   if (!value) return <>{fallback(error)}</>;

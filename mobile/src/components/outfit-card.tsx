@@ -4,11 +4,13 @@ import { categoryLabel, humanize } from "@/lib/constants/categories";
 import { OUTFIT_ROLE_LABELS, OUTFIT_ROLES, type OutfitRole } from "@/lib/constants/vocab";
 import type { ClothingItemSummary, Outfit } from "@/lib/types";
 import { useWardrobe } from "~/state/wardrobe";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 import { ClothingImage } from "./clothing-image";
 
 /** Outfit tile: a 2×2 collage of the actual clothing photos. */
 export function OutfitCard({ outfit }: { outfit: Outfit }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const { itemsById } = useWardrobe();
   const pieces = outfit.items.map((i) => itemsById.get(i.clothingItemId)).filter(Boolean).slice(0, 4);
   return (
@@ -34,6 +36,8 @@ const ORDER = new Map(OUTFIT_ROLES.map((r, i) => [r, i]));
 
 /** The actual clothing photos of an outfit, top to toe. */
 export function OutfitPieces({ pieces }: { pieces: { role: string; clothingItemId: string; item: ClothingItemSummary | null }[] }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const { itemsById } = useWardrobe();
   const sorted = [...pieces].sort((a, b) => (ORDER.get(a.role as OutfitRole) ?? 9) - (ORDER.get(b.role as OutfitRole) ?? 9));
   return (
@@ -65,7 +69,8 @@ export function OutfitPieces({ pieces }: { pieces: { role: string; clothingItemI
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   collage: { aspectRatio: 1, borderRadius: radius.lg, overflow: "hidden", backgroundColor: colors.muted, flexDirection: "row", flexWrap: "wrap" },
   piece: { aspectRatio: 3 / 4, borderRadius: radius.lg, overflow: "hidden", backgroundColor: colors.muted },
 });

@@ -6,7 +6,7 @@ import type { ClothingItemInput } from "@/lib/types";
 import type { DuplicateAction } from "~/core/commit";
 import { Badge, Banner, Button, Card, Chip, Muted, Segmented } from "~/ui/primitives";
 import { Sheet } from "~/ui/sheet";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 import { ClothingForm, emptyClothingInput } from "./clothing-form";
 import { blockingErrors, isDuplicate, isImportable, willSend, type PreviewItem } from "./import-model";
 
@@ -24,6 +24,7 @@ export function ImportPreview({
   onChange: (key: string, patch: Partial<PreviewItem>) => void;
   onAssign: (key: string, photoName: string) => void;
 }) {
+  const colors = useColors();
   const [editing, setEditing] = useState<PreviewItem | null>(null);
   const [draft, setDraft] = useState<ClothingItemInput | null>(null);
   const [assigning, setAssigning] = useState<PreviewItem | null>(null);
@@ -124,6 +125,7 @@ export function ImportPreview({
 }
 
 function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+  const colors = useColors();
   return (
     <Card style={{ flex: 1, alignItems: "center", paddingVertical: 10 }}>
       <Text style={{ fontSize: 20, fontWeight: "600", color: color ?? colors.foreground }}>{value}</Text>
@@ -133,10 +135,12 @@ function Stat({ label, value, color }: { label: string; value: number; color?: s
 }
 
 function Row({ item, canAssign, onChange, onEdit, onAssign }: { item: PreviewItem; canAssign: boolean; onChange: (p: Partial<PreviewItem>) => void; onEdit: () => void; onAssign: () => void }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const errors = blockingErrors(item);
   const input = item.input;
   return (
-    <Card style={[{ padding: 12 }, errors.length > 0 && !item.excluded && { borderColor: "#F0C9C4" }, item.excluded && { opacity: 0.5 }]}>
+    <Card style={[{ padding: 12 }, errors.length > 0 && !item.excluded && { borderColor: colors.errorBorder }, item.excluded && { opacity: 0.5 }]}>
       <View style={{ flexDirection: "row", gap: 12 }}>
         <View style={styles.photo}>
           {item.staged ? (
@@ -171,7 +175,7 @@ function Row({ item, canAssign, onChange, onEdit, onAssign }: { item: PreviewIte
       </View>
 
       {!item.excluded && errors.length > 0 && (
-        <View style={{ marginTop: 10, backgroundColor: "#FBEDEB", borderRadius: radius.md, padding: 10, gap: 2 }}>
+        <View style={{ marginTop: 10, backgroundColor: colors.errorBg, borderRadius: radius.md, padding: 10, gap: 2 }}>
           {errors.map((e) => (
             <Text key={e} style={{ fontSize: 12, color: colors.destructive }}>• {e}</Text>
           ))}
@@ -186,7 +190,7 @@ function Row({ item, canAssign, onChange, onEdit, onAssign }: { item: PreviewIte
       )}
 
       {!item.excluded && isDuplicate(item) && errors.length === 0 && (
-        <View style={{ marginTop: 10, backgroundColor: "#FBF3E6", borderRadius: radius.md, padding: 10, gap: 8 }}>
+        <View style={{ marginTop: 10, backgroundColor: colors.warningBg, borderRadius: radius.md, padding: 10, gap: 8 }}>
           <Text style={{ fontSize: 14, fontWeight: "500" }}>
             {item.duplicateOf ? "This clothing image already exists." : `Same photo as item #${(item.duplicateInBatch ?? 0) + 1} in this import.`}
           </Text>
@@ -215,6 +219,7 @@ function Row({ item, canAssign, onChange, onEdit, onAssign }: { item: PreviewIte
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   photo: { width: 84, aspectRatio: 3 / 4, borderRadius: radius.md, overflow: "hidden", backgroundColor: colors.muted, alignItems: "center", justifyContent: "center" },
 });

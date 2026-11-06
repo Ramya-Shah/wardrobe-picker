@@ -169,3 +169,34 @@ describe("backup & restore on the phone", () => {
     expect(fs.readFileSync(await exportCsv(svc), "utf8")).toContain("Tee");
   });
 });
+
+describe("settings & backup reminder", () => {
+  it("persists settings and ignores unknown/corrupt values", async () => {
+    const { loadSettings, saveSettings, DEFAULT_SETTINGS } = await import("~/core/settings");
+    expect(await loadSettings(svc.db)).toEqual(DEFAULT_SETTINGS);
+    await saveSettings(svc.db, { theme: "dark", backupReminderDays: 7 });
+    await svc.db.run("INSERT INTO Setting (key, value) VALUES ('theme2', 'not json')");
+    expect(await loadSettings(svc.db)).toMatchObject({ theme: "dark", backupReminderDays: 7 });
+  });
+
+  it("decides when a backup is due", async () => {
+    const { isBackupDue, DEFAULT_SETTINGS } = await import("~/core/settings");
+    const now = new Date("2026-09-30T12:00:00Z");
+    const s = { ...DEFAULT_SETTINGS, backupReminderDays: 14 };
+    expect(isBackupDue(s, 0, now)).toBe(false); // nothing to back up
+    expect(isBackupDue(s, 5, now)).toBe(true); // never backed up
+    expect(isBackupDue({ ...s, lastBackupAt: "2026-09-25T12:00:00Z" }, 5, now)).toBe(false);
+    expect(isBackupDue({ ...s, lastBackupAt: "2026-09-10T12:00:00Z" }, 5, now)).toBe(true);
+    expect(isBackupDue({ ...s, backupSnoozedUntil: "2026-10-01T00:00:00Z" }, 5, now)).toBe(false);
+    expect(isBackupDue({ ...s, backupReminderDays: 0 }, 5, now)).toBe(false);
+  });
+
+  it("migrates an existing v1 database to v2 without losing data", async () => {
+    await createItem(svc, { input: clothingItemInputSchema.parse({ name: "Keep me" }), source: "manual", aiGenerated: false });
+    await svc.db.exec("DROP TABLE Setting; PRAGMA user_version = 1;");
+    const { migrate } = await import("~/core/schema");
+    await migrate(svc.db);
+    expect((await svc.db.first<{ user_version: number }>("PRAGMA user_version"))?.user_version).toBe(2);
+    expect((await listItems(svc.db))[0].name).toBe("Keep me");
+  });
+});

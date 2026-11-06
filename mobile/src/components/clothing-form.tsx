@@ -3,7 +3,7 @@ import { CATEGORIES, categoryLabel, humanize, isKnownCategory, SUBCATEGORIES } f
 import { COMMON_OCCASIONS, COMMON_STYLES, ENVIRONMENTS, FORMALITY_LEVELS, PAIRING_KEYS, SEASONS } from "@/lib/constants/vocab";
 import type { ClothingItem, ClothingItemInput, EditableField } from "@/lib/types";
 import { Chip, Field, Label } from "~/ui/primitives";
-import { colors, fonts } from "~/ui/theme";
+import { fonts, useColors } from "~/ui/theme";
 import { ListInput } from "./list-input";
 import { fieldOrigin, OriginMark } from "./provenance";
 
@@ -29,6 +29,7 @@ export function ClothingForm({
   item?: Pick<ClothingItem, "aiGenerated" | "editedFields" | "inferredFields">;
   nameError?: string | null;
 }) {
+  const colors = useColors();
   const set = <K extends EditableField>(k: K, v: ClothingItemInput[K]) => onChange({ ...value, [k]: v });
   const text = (k: EditableField) => (value[k] as string | null) ?? "";
   const setText = (k: EditableField, v: string) => set(k, (v.trim() ? v : null) as never);
@@ -177,6 +178,7 @@ export function ClothingForm({
 }
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useColors();
   return (
     <View style={{ gap: 14 }}>
       <Text style={{ fontFamily: fonts.serif, fontSize: 19, color: colors.foreground }}>{title}</Text>

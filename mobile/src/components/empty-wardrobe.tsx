@@ -2,9 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { View } from "react-native";
 import { Button, Muted, Title } from "~/ui/primitives";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 export function EmptyWardrobe() {
+  const colors = useColors();
   return (
     <View style={{ alignItems: "center", paddingHorizontal: 24, paddingVertical: 48 }}>
       <View style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: colors.muted, alignItems: "center", justifyContent: "center", marginBottom: 18 }}>

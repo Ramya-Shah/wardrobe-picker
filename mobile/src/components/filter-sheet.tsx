@@ -4,7 +4,7 @@ import { categoryLabel, humanize } from "@/lib/constants/categories";
 import { FILTER_KEYS, FILTER_LABELS, type FilterKey, type SearchFilters } from "@/lib/search/filters";
 import { Button, Chip, SectionTitle } from "~/ui/primitives";
 import { Sheet } from "~/ui/sheet";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 export type Facets = Record<FilterKey, { value: string; count: number }[]>;
 
@@ -24,6 +24,7 @@ export function FilterSheet({
   filters: SearchFilters;
   onApply: (f: SearchFilters) => void;
 }) {
+  const colors = useColors();
   const [draft, setDraft] = useState(filters);
   const [expanded, setExpanded] = useState<Set<FilterKey>>(new Set());
   // Start from the applied filters each time the sheet opens.

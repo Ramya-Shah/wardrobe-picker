@@ -145,6 +145,7 @@ const fail = (errors: string[]): RestoreResult => ({ ok: false, itemsRestored: 0
 /** Stream-extract database.json and images/* from a backup zip (or read a bare database.json). */
 async function extractBackup(svc: Services, source: string, into: string): Promise<{ json: string | null; images: Map<string, string>; error: string | null }> {
   const images = new Map<string, string>();
+  await svc.files.ensureDir(into);
   const reader = svc.files.openReader(source);
   try {
     const head = reader.read(Math.min(4, reader.size));
@@ -227,7 +228,15 @@ export async function restoreBackup(svc: Services, source: string, mode: Restore
   const tmp = joinPath(svc.cacheRoot, "restore", randomToken(svc, 10));
   await svc.files.ensureDir(tmp);
   try {
-    const { json, images, error } = await extractBackup(svc, source, tmp);
+    // Work on a private copy: a picked file is a content:// link, and chunked reads on those
+    // fail in expo-file-system ("bad file descriptor"), while a plain copy streams reliably.
+    const local = joinPath(tmp, "backup-source");
+    try {
+      await svc.files.copy(source, local);
+    } catch (e) {
+      return fail([`Could not read the backup file: ${e instanceof Error ? e.message : String(e)}`]);
+    }
+    const { json, images, error } = await extractBackup(svc, local, joinPath(tmp, "files"));
     if (error || json === null) return fail([error ?? "Empty backup."]);
     let parsed: unknown;
     try {

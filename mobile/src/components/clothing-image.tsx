@@ -4,7 +4,7 @@ import { useState } from "react";
 import { View, type ImageStyle, type StyleProp } from "react-native";
 import { imageFile, thumbFile } from "~/core/images";
 import { useWardrobe } from "~/state/wardrobe";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 /** A clothing photo from the phone's storage: the ~480px thumbnail by default, or the original. */
 export function ClothingImage({
@@ -18,6 +18,7 @@ export function ClothingImage({
   style?: StyleProp<ImageStyle>;
   contentFit?: "cover" | "contain";
 }) {
+  const colors = useColors();
   const { svc } = useWardrobe();
   const [useOriginal, setUseOriginal] = useState(false);
   if (!imagePath) {

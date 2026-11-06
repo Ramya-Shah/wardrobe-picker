@@ -54,6 +54,13 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS OutfitItem_clothingItemId_idx ON OutfitItem(clothingItemId);
   `,
+  // v2: app preferences (theme, backup reminder…) as simple key/value pairs.
+  `
+  CREATE TABLE IF NOT EXISTS Setting (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+  );
+  `,
 ];
 
 /** Apply pending migrations, tracked with PRAGMA user_version. */

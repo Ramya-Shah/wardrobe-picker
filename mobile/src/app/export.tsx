@@ -7,10 +7,11 @@ import { WardrobeBrowser } from "~/components/wardrobe-browser";
 import { useWardrobe } from "~/state/wardrobe";
 import { Button, Muted, Segmented } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
-import { colors } from "~/ui/theme";
+import { useColors } from "~/ui/theme";
 
 /** Select items (or everything) and copy/share them as context for Claude. */
 export default function ExportScreen() {
+  const colors = useColors();
   const { items } = useWardrobe();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<"text" | "json">("text");

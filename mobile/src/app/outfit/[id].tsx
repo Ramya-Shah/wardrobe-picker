@@ -7,9 +7,10 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Badge, Body, IconButton, Muted, SectionTitle } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 export default function OutfitScreen() {
+  const colors = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { svc, outfits, refresh } = useWardrobe();
   const toast = useToast();

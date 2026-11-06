@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { categoryLabel, humanize } from "@/lib/constants/categories";
 import type { ClothingItem } from "@/lib/types";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 import { ClothingImage } from "./clothing-image";
 
 /** Grid card: the photo is the hero; name, category · color and two tags underneath. */
@@ -20,6 +20,8 @@ export function ClothingCard({
   onPress?: () => void;
   note?: string;
 }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const meta = [categoryLabel(item.category), humanize(item.primaryColor)].filter(Boolean).join(" · ");
   return (
     <Pressable
@@ -33,7 +35,7 @@ export function ClothingCard({
         <ClothingImage imagePath={item.imagePath} style={StyleSheet.absoluteFill} />
         {selectable && (
           <View style={[styles.check, selected ? { backgroundColor: colors.primary, borderColor: colors.primary } : null]}>
-            {selected && <Ionicons name="checkmark" size={16} color="#fff" />}
+            {selected && <Ionicons name="checkmark" size={16} color={colors.primaryForeground} />}
           </View>
         )}
       </View>
@@ -57,10 +59,11 @@ export function ClothingCard({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   photo: { aspectRatio: 3 / 4, borderRadius: radius.lg, overflow: "hidden", backgroundColor: colors.muted },
   selected: { borderWidth: 3, borderColor: colors.primary },
-  check: { position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: "#fff", backgroundColor: "rgba(0,0,0,0.15)", alignItems: "center", justifyContent: "center" },
+  check: { position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: "#fff", backgroundColor: colors.photoScrim, alignItems: "center", justifyContent: "center" },
   name: { marginTop: 8, fontSize: 14, fontWeight: "500", color: colors.foreground },
   meta: { fontSize: 12, color: colors.mutedForeground },
   tags: { fontSize: 11, color: colors.mutedForeground, marginTop: 1 },

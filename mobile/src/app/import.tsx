@@ -15,7 +15,7 @@ import { useWardrobe } from "~/state/wardrobe";
 import { Banner, Body, Button, Card, Field, Label, Muted, Segmented, Title } from "~/ui/primitives";
 import { Screen } from "~/ui/screen";
 import { useToast } from "~/ui/toast";
-import { colors, radius } from "~/ui/theme";
+import { radius, useColors } from "~/ui/theme";
 
 type Mode = "single" | "batch";
 type Step = "input" | "staging" | "preview" | "committing" | "done";
@@ -26,6 +26,7 @@ type Step = "input" | "staging" | "preview" | "committing" | "done";
  *  Batch:  many photos + one JSON — matched by filename, never by order.
  */
 export default function ImportScreen() {
+  const colors = useColors();
   const params = useLocalSearchParams<{ mode?: string }>();
   const { svc, refresh } = useWardrobe();
   const toast = useToast();

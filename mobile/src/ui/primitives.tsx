@@ -13,27 +13,32 @@ import {
   type TextProps,
   type ViewStyle,
 } from "react-native";
-import { colors, fonts, radius } from "./theme";
+import { fonts, radius, type Palette, useColors, useStyles } from "./theme";
 
 export type IconName = React.ComponentProps<typeof Ionicons>["name"];
 
 export function Title({ style, ...p }: TextProps) {
+  const colors = useColors();
   return <Text {...p} style={[{ fontFamily: fonts.serif, fontSize: 24, color: colors.foreground }, style]} />;
 }
 
 export function Body({ style, ...p }: TextProps) {
+  const colors = useColors();
   return <Text {...p} style={[{ fontSize: 15, lineHeight: 22, color: colors.foreground }, style]} />;
 }
 
 export function Muted({ style, ...p }: TextProps) {
+  const colors = useColors();
   return <Text {...p} style={[{ fontSize: 13, lineHeight: 18, color: colors.mutedForeground }, style]} />;
 }
 
 export function Label({ style, ...p }: TextProps) {
+  const colors = useColors();
   return <Text {...p} style={[{ fontSize: 13, fontWeight: "500", color: colors.mutedForeground, marginBottom: 6 }, style]} />;
 }
 
 export function SectionTitle({ style, ...p }: TextProps) {
+  const colors = useColors();
   return <Text {...p} style={[{ fontSize: 14, fontWeight: "600", color: colors.foreground, marginBottom: 8 }, style]} />;
 }
 
@@ -49,6 +54,8 @@ export function Button({
   style,
   ...p
 }: Omit<PressableProps, "style"> & { title?: string; icon?: IconName; variant?: Variant; size?: "sm" | "md" | "lg"; loading?: boolean; style?: StyleProp<ViewStyle> }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const fg = variant === "default" ? colors.primaryForeground : variant === "destructive" ? "#fff" : colors.foreground;
   const h = size === "sm" ? 36 : size === "lg" ? 52 : 46;
   return (
@@ -74,15 +81,19 @@ export function Button({
   );
 }
 
-export function IconButton({ icon, onPress, label, color = colors.foreground }: { icon: IconName; onPress: () => void; label: string; color?: string }) {
+export function IconButton({ icon, onPress, label, color }: { icon: IconName; onPress: () => void; label: string; color?: string }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   return (
     <Pressable onPress={onPress} accessibilityLabel={label} hitSlop={8} style={({ pressed }) => [styles.iconBtn, pressed && { backgroundColor: colors.accent }]}>
-      <Ionicons name={icon} size={22} color={color} />
+      <Ionicons name={icon} size={22} color={color ?? colors.foreground} />
     </Pressable>
   );
 }
 
 export function Chip({ label, active, onPress, count }: { label: string; active?: boolean; onPress?: () => void; count?: number }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -98,6 +109,8 @@ export function Chip({ label, active, onPress, count }: { label: string; active?
 }
 
 export const Field = forwardRef<TextInput, TextInputProps & { multiline?: boolean }>(function Field({ style, multiline, ...p }, ref) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   return (
     <TextInput
       ref={ref}
@@ -111,7 +124,9 @@ export const Field = forwardRef<TextInput, TextInputProps & { multiline?: boolea
 });
 
 export function Badge({ label, tone = "default" }: { label: string; tone?: "default" | "ai" | "success" | "outline" }) {
-  const bg = tone === "ai" ? "#EEEAF8" : tone === "success" ? "#E6F2EC" : tone === "outline" ? "transparent" : colors.muted;
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
+  const bg = tone === "ai" ? colors.aiBg : tone === "success" ? colors.successBg : tone === "outline" ? "transparent" : colors.muted;
   const fg = tone === "ai" ? colors.ai : tone === "success" ? colors.success : colors.foreground;
   return (
     <View style={[styles.badge, { backgroundColor: bg }, tone === "outline" && { borderWidth: 1, borderColor: colors.border }]}>
@@ -121,10 +136,12 @@ export function Badge({ label, tone = "default" }: { label: string; tone?: "defa
 }
 
 export function Banner({ tone, children, icon }: { tone: "error" | "warning" | "success" | "info"; children: React.ReactNode; icon?: IconName }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const palette = {
-    error: { bg: "#FBEDEB", border: "#F0C9C4", fg: colors.destructive, icon: "alert-circle-outline" as IconName },
-    warning: { bg: "#FBF3E6", border: "#EFDDBB", fg: colors.foreground, icon: "warning-outline" as IconName },
-    success: { bg: "#EAF4EE", border: "#C4E0CF", fg: colors.foreground, icon: "checkmark-circle-outline" as IconName },
+    error: { bg: colors.errorBg, border: colors.errorBorder, fg: colors.destructive, icon: "alert-circle-outline" as IconName },
+    warning: { bg: colors.warningBg, border: colors.warningBorder, fg: colors.foreground, icon: "warning-outline" as IconName },
+    success: { bg: colors.successBg, border: colors.successBorder, fg: colors.foreground, icon: "checkmark-circle-outline" as IconName },
     info: { bg: colors.muted, border: colors.border, fg: colors.foreground, icon: "information-circle-outline" as IconName },
   }[tone];
   return (
@@ -136,6 +153,8 @@ export function Banner({ tone, children, icon }: { tone: "error" | "warning" | "
 }
 
 export function Segmented<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T | null; onChange: (v: T) => void }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.segmented}>
       {options.map((o) => (
@@ -150,10 +169,12 @@ export function Segmented<T extends string>({ options, value, onChange }: { opti
 }
 
 export function Card({ style, ...p }: React.ComponentProps<typeof View>) {
+  const colors = useColors();
   return <View {...p} style={[{ backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border }, style]} />;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   btn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: radius.full },
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   chip: { height: 36, paddingHorizontal: 14, borderRadius: radius.full, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card, justifyContent: "center" },

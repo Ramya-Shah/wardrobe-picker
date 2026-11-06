@@ -7,7 +7,7 @@ import { computeFacets, structuredSearch } from "@/lib/search/structured-search"
 import type { ClothingItem } from "@/lib/types";
 import { useWardrobe } from "~/state/wardrobe";
 import { Chip, IconButton } from "~/ui/primitives";
-import { colors, radius } from "~/ui/theme";
+import { radius, type Palette, useColors, useStyles } from "~/ui/theme";
 import { ClothingCard } from "./clothing-card";
 import { FilterSheet } from "./filter-sheet";
 
@@ -42,6 +42,8 @@ export function WardrobeBrowser({
   empty?: React.ReactElement;
   bottomPadding?: number;
 }) {
+  const colors = useColors();
+  const styles = useStyles(makeStyles);
   const { items: all } = useWardrobe();
   const items = itemsOverride ?? all;
   const [q, setQ] = useState("");
@@ -91,7 +93,7 @@ export function WardrobeBrowser({
             <Ionicons name="options-outline" size={20} color={colors.foreground} />
             {activeFilterCount({ ...filters, category: undefined }) > 0 && (
               <View style={styles.dot}>
-                <Text style={{ color: "#fff", fontSize: 11 }}>{activeFilterCount({ ...filters, category: undefined })}</Text>
+                <Text style={{ color: colors.primaryForeground, fontSize: 11 }}>{activeFilterCount({ ...filters, category: undefined })}</Text>
               </View>
             )}
           </Pressable>
@@ -177,7 +179,8 @@ export function WardrobeBrowser({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   search: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8, height: 46, borderRadius: radius.full, backgroundColor: colors.muted, paddingLeft: 14, paddingRight: 4 },
   filterBtn: { width: 46, height: 46, borderRadius: 23, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.card, alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", top: -2, right: -2, minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
